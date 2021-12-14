@@ -1,4 +1,4 @@
-// use ansi_term::{Color, Style};
+use ansi_term::{Colour};
 use std::env::{args, Args};
 
 fn main() {
@@ -9,14 +9,18 @@ fn main() {
     // and then advances it
     // it calls .next() on the iterator at the nth index
     let operand1 = args.nth(1).unwrap().parse::<f32>().unwrap();
-
     let operator = args.next().unwrap().chars().next().unwrap(); // operator must be parsed as a char
-
     let operand2 = args.next().unwrap().trim().parse::<f32>().unwrap();
 
     let result = operate(operand1, operator, operand2);
 
-    println!("{} {} {} = {}", operand1, operator, operand2, result);
+    println!("{} {} {} {} {}", 
+        Colour::Blue.paint(operand1.to_string()), 
+        Colour::Red.bold().paint(operator.to_string()), 
+        Colour::Blue.paint(operand2.to_string()),
+        Colour::Green.bold().paint('='.to_string()),
+        Colour::Yellow.underline().paint(result.to_string())
+    );
 
     // args are supplied by ```cargo run -- <argument>```
 }
