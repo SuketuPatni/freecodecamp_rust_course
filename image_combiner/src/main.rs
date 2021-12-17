@@ -39,7 +39,8 @@ fn main() -> Result<(), ImageDataError> {
     if image_1_format != image_2_format {
         return Err(ImageDataError::DifferentImageFormats);
     } 
-    let output = FloatingImage::new(image_1.width, image_1.height, args.output)
+    let (image_1, image_2) = resize_image(image_1, image_2);
+    let output = FloatingImage::new(image_1.width(), image_1.height(), args.output);
 
     Ok(())
 }
@@ -70,22 +71,39 @@ fn resize_image(image_1: DynamicImage, image_2: DynamicImage) -> (DynamicImage, 
 }
 
 
+fn combine_images(image_1: DynamicImage, image_2: DynamicImage) -> Vec<u8> {
+    let vec_1 = image_1.to_rgba8().into_vec(); // returns a vector of pixels as their rgba values
+    let vec_2 = image_2.to_rgba8().into_vec();
 
+    alternate_pixels(vec_1, vec_2) // the main process of this image combiner
+}
 
+fn alternate_pixels(vec_1: Vec<u8>, vec_2: Vec<u8>) -> Vec<u8> {
+    let length = vec_1.len();
+    let mut combined_data = vec![0u8, length as u8];
+    let mut i = 0;
 
+    while i < length {
+        if i % 8 == 0 {
+            combined_data.splice(i..(i+3), set_rgba(&vec_1, i, i + 3));
+        } else {
+            combined_data.splice(i..(i+3), set_rgba(&vec_2, i, i + 3));
+        }
+        i += 4;
+    }
 
+    combined_data
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn set_rgba(vec: &Vec<u8>, start: usize, end: usize) -> Vec<u8> {
+    let mut rgba = vec![];
+    for i in start..end {
+        rgba.push(
+            match vec.get(i) {
+                Some(d) => *d,
+                None => panic!("Index out of bounds")
+            }
+        )
+    }
+    rgba
+}
